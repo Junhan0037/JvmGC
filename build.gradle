@@ -62,7 +62,7 @@ dependencies {
 }
 
 tasks.named('test') {
-//    useJUnitPlatform()
+    useJUnitPlatform()
 }
 
 // JMH 벤치마크 실행을 위한 태스크
