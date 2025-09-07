@@ -1,0 +1,68 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.5'
+    id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com'
+version = '0.0.1-SNAPSHOT'
+description = 'JvmGC'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // === 핵심 프레임워크 ===
+    // Spring Boot - 기본 프레임워크
+    implementation 'org.springframework.boot:spring-boot-starter'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework:spring-websocket:6.0.13'
+    
+    // === 성능 테스트 및 벤치마크 ===
+    // JMH - Java Microbenchmark Harness
+    implementation 'org.openjdk.jmh:jmh-core:1.37'
+    annotationProcessor 'org.openjdk.jmh:jmh-generator-annprocess:1.37'
+    
+    // === 메모리 관리 ===
+    // Chronicle Map - Off-heap 메모리 저장소
+    implementation 'net.openhft:chronicle-map:3.24ea0'
+    
+    // === 모니터링 및 메트릭 ===
+    // Micrometer - 메트릭 수집 라이브러리
+    implementation 'io.micrometer:micrometer-core:1.11.5'
+    implementation 'io.micrometer:micrometer-registry-prometheus:1.11.5'
+    
+    // === 코드 간소화 ===
+    // Lombok - 어노테이션 기반 코드 생성
+    compileOnly 'org.projectlombok:lombok:1.18.30'
+    annotationProcessor 'org.projectlombok:lombok:1.18.30'
+    
+    // === 테스트 ===
+    // JUnit 5 - 테스트 프레임워크
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.0'
+    
+    // AssertJ - 테스트 어설션 라이브러리
+    testImplementation 'org.assertj:assertj-core:3.24.2'
+    
+    // Spring Boot Test - 통합 테스트 지원
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// JMH 벤치마크 실행을 위한 태스크
+task jmh(type: JavaExec, dependsOn: classes) {
+    main = 'org.openjdk.jmh.Main'
+    classpath = sourceSets.main.runtimeClasspath
+}
