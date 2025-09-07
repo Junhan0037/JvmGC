@@ -2,6 +2,8 @@ package com.jvmgc.pool;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -46,8 +48,9 @@ public class MessageProcessor {
     private final AtomicLong processedBytes = new AtomicLong(0);
     
     /**
-     * 메트릭 레지스트리
+     * 메트릭 레지스트리 - 객체 풀 성능 모니터링용
      */
+    @SuppressWarnings("unused") // 실제로는 HighPerformanceObjectPool 생성자에서 사용됨
     private final MeterRegistry meterRegistry;
     
     public MessageProcessor() {
@@ -327,8 +330,8 @@ public class MessageProcessor {
             
             // 진행률 로깅
             if (i % 10000 == 0 && i > 0) {
-                log.info("처리 진행률: {}/{} ({:.1f}%)", 
-                        i, messageCount, (double) i / messageCount * 100);
+                log.info("처리 진행률: {}/{} ({}%)", 
+                        i, messageCount, String.format("%.1f", (double) i / messageCount * 100));
             }
         }
         
@@ -383,8 +386,8 @@ public class MessageProcessor {
     /**
      * 메시지 처리 결과
      */
-    @lombok.Builder
-    @lombok.Data
+    @Builder
+    @Data
     public static class ProcessingResult {
         private boolean success;
         private String errorMessage;
@@ -399,8 +402,8 @@ public class MessageProcessor {
     /**
      * 배치 처리 통계
      */
-    @lombok.Builder
-    @lombok.Data
+    @Builder
+    @Data
     public static class BatchProcessingStats {
         private int totalMessages;
         private int successCount;
@@ -416,8 +419,8 @@ public class MessageProcessor {
     /**
      * 현재 처리 통계
      */
-    @lombok.Builder
-    @lombok.Data
+    @Builder
+    @Data
     public static class ProcessingStats {
         private long totalProcessedMessages;
         private long totalProcessedBytes;

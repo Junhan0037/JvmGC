@@ -1,7 +1,7 @@
 package com.jvmgc.repository;
 
 import com.jvmgc.model.Product;
-import org.springframework.data.domain.PageRequest;
+
 import java.util.List;
 
 /**
@@ -14,10 +14,11 @@ public interface ProductRepository {
      * 상품명으로 검색 (페이징 지원)
      * - 데이터베이스 레벨에서 필터링하여 메모리 사용량 최적화
      * @param keyword 검색 키워드
-     * @param pageRequest 페이징 정보
+     * @param page 페이지 번호 (0부터 시작)
+     * @param size 페이지 크기
      * @return 검색된 상품 목록 (페이징 적용)
      */
-    List<Product> findByNameContaining(String keyword, PageRequest pageRequest);
+    List<Product> findByNameContaining(String keyword, int page, int size);
     
     /**
      * 모든 상품 조회

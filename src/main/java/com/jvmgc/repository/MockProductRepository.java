@@ -1,8 +1,9 @@
 package com.jvmgc.repository;
 
 import com.jvmgc.model.Product;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
@@ -49,19 +50,20 @@ public class MockProductRepository implements ProductRepository {
      * - 메모리 사용량 최적화를 위한 페이징 처리
      * 
      * @param keyword 검색 키워드
-     * @param pageRequest 페이징 정보
+     * @param page 페이지 번호 (0부터 시작)
+     * @param size 페이지 크기
      * @return 검색된 상품 목록 (페이징 적용)
      */
     @Override
-    public List<Product> findByNameContaining(String keyword, PageRequest pageRequest) {
+    public List<Product> findByNameContaining(String keyword, int page, int size) {
         log.debug("findByNameContaining 호출 - 키워드: {}, 페이지: {}, 크기: {}", 
-                keyword, pageRequest.getPageNumber(), pageRequest.getPageSize());
+                keyword, page, size);
         
         // 효율적인 검색을 위한 인덱스 활용
         List<Product> matchedProducts = productStore.values().stream()
                 .filter(product -> product.getName().contains(keyword))
-                .skip((long) pageRequest.getPageNumber() * pageRequest.getPageSize())
-                .limit(pageRequest.getPageSize())
+                .skip((long) page * size)
+                .limit(size)
                 .collect(Collectors.toList());
                 
         log.debug("검색 결과 개수: {}", matchedProducts.size());
@@ -188,8 +190,8 @@ public class MockProductRepository implements ProductRepository {
     /**
      * 저장소 통계 정보 클래스
      */
-    @lombok.Builder
-    @lombok.Data
+    @Builder
+    @Data
     public static class RepositoryStats {
         private int totalProducts;
         private int totalCategories;

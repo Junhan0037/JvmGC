@@ -1,5 +1,8 @@
 package com.jvmgc.monitor;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -227,12 +230,12 @@ public class GCMonitor {
         // 힙 사용률 검사
         double heapUsageRatio = (double) snapshot.getHeapUsed() / snapshot.getHeapMax();
         if (heapUsageRatio > thresholds.getCriticalHeapUsageRatio()) {
-            log.error("🚨 심각한 힙 사용률 감지: {:.2f}% (임계치: {:.2f}%)", 
-                    heapUsageRatio * 100, thresholds.getCriticalHeapUsageRatio() * 100);
+            log.error("🚨 심각한 힙 사용률 감지: {}% (임계치: {}%)", 
+                    String.format("%.2f", heapUsageRatio * 100), String.format("%.2f", thresholds.getCriticalHeapUsageRatio() * 100));
             // 실제 환경에서는 알림 시스템 연동
         } else if (heapUsageRatio > thresholds.getWarningHeapUsageRatio()) {
-            log.warn("⚠️ 높은 힙 사용률 감지: {:.2f}% (경고 임계치: {:.2f}%)", 
-                    heapUsageRatio * 100, thresholds.getWarningHeapUsageRatio() * 100);
+            log.warn("⚠️ 높은 힙 사용률 감지: {}% (경고 임계치: {}%)", 
+                    String.format("%.2f", heapUsageRatio * 100), String.format("%.2f", thresholds.getWarningHeapUsageRatio() * 100));
         }
         
         // GC 빈도 검사
@@ -255,8 +258,8 @@ public class GCMonitor {
                 if (countDelta > 0) {
                     double avgPauseMs = (double) timeDelta / countDelta;
                     if (avgPauseMs > thresholds.getMaxAvgGCPauseMs()) {
-                        log.warn("⚠️ 긴 GC pause 감지 - {}: 평균 {:.2f}ms (임계치: {:.2f}ms)", 
-                                gcName, avgPauseMs, thresholds.getMaxAvgGCPauseMs());
+                        log.warn("⚠️ 긴 GC pause 감지 - {}: 평균 {}ms (임계치: {}ms)", 
+                                gcName, String.format("%.2f", avgPauseMs), String.format("%.2f", thresholds.getMaxAvgGCPauseMs()));
                     }
                 }
             }
@@ -269,10 +272,10 @@ public class GCMonitor {
     private void logMonitoringInfo(MonitoringSnapshot snapshot) {
         // 메모리 사용량 로깅
         double heapUsageRatio = (double) snapshot.getHeapUsed() / snapshot.getHeapMax();
-        log.info("📊 힙 메모리: {} / {} ({:.2f}%)", 
+        log.info("📊 힙 메모리: {} / {} ({}%)", 
                 formatBytes(snapshot.getHeapUsed()),
                 formatBytes(snapshot.getHeapMax()),
-                heapUsageRatio * 100);
+                String.format("%.2f", heapUsageRatio * 100));
         
         // GC 통계 로깅
         for (Map.Entry<String, GCSnapshot> entry : snapshot.getGcStats().entrySet()) {
@@ -286,8 +289,8 @@ public class GCMonitor {
                 
                 if (countDelta > 0) {
                     double avgPauseMs = (double) timeDelta / countDelta;
-                    log.info("🔄 {}: {}회 실행, 총 {}ms, 평균 {:.2f}ms", 
-                            gcName, countDelta, timeDelta, avgPauseMs);
+                    log.info("🔄 {}: {}회 실행, 총 {}ms, 평균 {}ms", 
+                            gcName, countDelta, timeDelta, String.format("%.2f", avgPauseMs));
                 }
             }
         }
@@ -309,10 +312,10 @@ public class GCMonitor {
         
         // 메모리 사용량
         MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
-        log.info("힙 메모리 사용량: {} / {} ({:.2f}%)", 
+        log.info("힙 메모리 사용량: {} / {} ({}%)", 
                 formatBytes(heapUsage.getUsed()),
                 formatBytes(heapUsage.getMax()),
-                (double) heapUsage.getUsed() / heapUsage.getMax() * 100);
+                String.format("%.2f", (double) heapUsage.getUsed() / heapUsage.getMax() * 100));
         
         MemoryUsage nonHeapUsage = memoryBean.getNonHeapMemoryUsage();
         log.info("Non-Heap 메모리 사용량: {} / {}", 
@@ -345,13 +348,13 @@ public class GCMonitor {
         long monitoringDurationMs = currentTime - monitoringStartTime;
         double monitoringDurationHours = monitoringDurationMs / (1000.0 * 3600);
         
-        log.info("모니터링 기간: {:.2f}시간", monitoringDurationHours);
+        log.info("모니터링 기간: {}시간", String.format("%.2f", monitoringDurationHours));
         
         // 현재 메모리 상태
         MemoryUsage heapUsage = memoryBean.getHeapMemoryUsage();
         double heapUsageRatio = (double) heapUsage.getUsed() / heapUsage.getMax();
         
-        log.info("현재 힙 사용률: {:.2f}%", heapUsageRatio * 100);
+        log.info("현재 힙 사용률: {}%", String.format("%.2f", heapUsageRatio * 100));
         
         // GC 성능 분석
         for (GarbageCollectorMXBean gcBean : gcBeans) {
@@ -369,9 +372,9 @@ public class GCMonitor {
                 log.info("=== {} 분석 ===", gcName);
                 log.info("  총 실행 횟수: {}", totalCollections);
                 log.info("  총 실행 시간: {}ms", totalTime);
-                log.info("  평균 pause 시간: {:.2f}ms", avgPauseMs);
-                log.info("  시간당 실행 횟수: {:.1f}회", collectionsPerHour);
-                log.info("  GC 오버헤드: {:.2f}%", gcOverheadPercent);
+                log.info("  평균 pause 시간: {}ms", String.format("%.2f", avgPauseMs));
+                log.info("  시간당 실행 횟수: {}회", String.format("%.1f", collectionsPerHour));
+                log.info("  GC 오버헤드: {}%", String.format("%.2f", gcOverheadPercent));
                 
                 // 성능 평가
                 evaluateGCPerformance(gcName, avgPauseMs, gcOverheadPercent);
@@ -489,8 +492,8 @@ public class GCMonitor {
     /**
      * GC 스냅샷
      */
-    @lombok.AllArgsConstructor
-    @lombok.Data
+    @AllArgsConstructor
+    @Data
     private static class GCSnapshot {
         private long collectionCount;
         private long collectionTime;
@@ -499,8 +502,8 @@ public class GCMonitor {
     /**
      * 모니터링 스냅샷
      */
-    @lombok.Builder
-    @lombok.Data
+    @Builder
+    @Data
     private static class MonitoringSnapshot {
         private long timestamp;
         private long heapUsed;
@@ -514,7 +517,7 @@ public class GCMonitor {
     /**
      * 모니터링 임계치 설정
      */
-    @lombok.Data
+    @Data
     private static class MonitoringThresholds {
         private double warningHeapUsageRatio = 0.8;    // 80%
         private double criticalHeapUsageRatio = 0.9;   // 90%

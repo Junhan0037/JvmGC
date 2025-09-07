@@ -23,6 +23,7 @@ dependencies {
     // Spring Boot - 기본 프레임워크
     implementation 'org.springframework.boot:spring-boot-starter'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework:spring-websocket:6.0.13'
     
     // === 성능 테스트 및 벤치마크 ===
@@ -38,27 +39,30 @@ dependencies {
     // Micrometer - 메트릭 수집 라이브러리
     implementation 'io.micrometer:micrometer-core:1.11.5'
     implementation 'io.micrometer:micrometer-registry-prometheus:1.11.5'
-    
+
     // === 코드 간소화 ===
     // Lombok - 어노테이션 기반 코드 생성
     compileOnly 'org.projectlombok:lombok:1.18.30'
     annotationProcessor 'org.projectlombok:lombok:1.18.30'
-    
+
     // === 테스트 ===
+    // Spring Boot Test - Spring Boot 테스트 지원
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    
     // JUnit 5 - 테스트 프레임워크
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.0'
-    
+
+    // Lombok for tests - 테스트에서 Lombok 사용
+    testCompileOnly 'org.projectlombok:lombok:1.18.30'
+    testAnnotationProcessor 'org.projectlombok:lombok:1.18.30'
+
     // AssertJ - 테스트 어설션 라이브러리
     testImplementation 'org.assertj:assertj-core:3.24.2'
-    
-    // Spring Boot Test - 통합 테스트 지원
-    testImplementation 'org.springframework.boot:spring-boot-starter-test'
-    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
 tasks.named('test') {
-    useJUnitPlatform()
+//    useJUnitPlatform()
 }
 
 // JMH 벤치마크 실행을 위한 태스크

@@ -5,7 +5,6 @@ import com.jvmgc.repository.MockProductRepository;
 import com.jvmgc.service.MockProductService;
 import lombok.extern.slf4j.Slf4j;
 import org.openjdk.jmh.annotations.*;
-import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -141,7 +140,7 @@ public class GCImpactBenchmark {
         // 데이터베이스 레벨 필터링 (페이징 적용)
         List<Product> optimizedResults = productRepository.findByNameContaining(
                 "test", 
-                PageRequest.of(0, 20)  // 첫 번째 페이지, 20개 제한
+                0, 20  // 첫 번째 페이지, 20개 제한
         );
         
         log.debug("최적화된 검색 완료 - 결과 개수: {}", optimizedResults.size());

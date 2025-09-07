@@ -357,8 +357,8 @@ public class ReferenceExample {
         long maxMB = heapUsage.getMax() / (1024 * 1024);
         double usagePercent = (double) heapUsage.getUsed() / heapUsage.getMax() * 100;
         
-        log.info("[{}] 힙 메모리: {}MB / {}MB ({:.2f}%)", 
-                phase, usedMB, maxMB, usagePercent);
+        log.info("[{}] 힙 메모리: {}MB / {}MB ({}%)", 
+                phase, usedMB, maxMB, String.format("%.2f", usagePercent));
     }
     
     /**

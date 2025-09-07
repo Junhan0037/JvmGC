@@ -1,10 +1,11 @@
 package com.jvmgc.cache;
 
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import net.openhft.chronicle.map.ChronicleMap;
 import org.springframework.stereotype.Component;
 
-import java.io.IOException;
 import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
@@ -97,7 +98,7 @@ public class EnterpriseCache {
                     .averageValueSize(1024)    // 평균 값 크기 1KB
                     .create();
             log.info("L2 캐시 초기화 완료 - 최대 크기: {}", L2_MAX_SIZE);
-        } catch (IOException e) {
+        } catch (Exception e) {
             log.error("L2 캐시 초기화 실패", e);
             throw new RuntimeException("L2 캐시 초기화 실패", e);
         }
@@ -288,7 +289,7 @@ public class EnterpriseCache {
         scheduler.scheduleAtFixedRate(() -> {
             try {
                 if (isMemoryPressureHigh()) {
-                    log.warn("높은 메모리 사용률 감지: {:.2f}%", getCurrentMemoryUsageRatio() * 100);
+                    log.warn("높은 메모리 사용률 감지: {}%", String.format("%.2f", getCurrentMemoryUsageRatio() * 100));
                     evictExpiredEntries();
                     evictFromL1Cache();
                 }
@@ -441,8 +442,8 @@ public class EnterpriseCache {
     /**
      * 캐시 통계 정보
      */
-    @lombok.Builder
-    @lombok.Data
+    @Builder
+    @Data
     public static class CacheStats {
         private int l1Size;
         private long l2Size;
@@ -459,8 +460,8 @@ public class EnterpriseCache {
     /**
      * 메모리 사용량 정보
      */
-    @lombok.Builder
-    @lombok.Data
+    @Builder
+    @Data
     public static class MemoryUsageInfo {
         private long used;
         private long max;

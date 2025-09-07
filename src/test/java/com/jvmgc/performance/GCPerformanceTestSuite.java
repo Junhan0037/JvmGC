@@ -108,7 +108,7 @@ public class GCPerformanceTestSuite {
         if (currentGC.toLowerCase().contains("parallel")) {
             // Parallel GC는 처리량이 높지만 pause time이 길 수 있음
             assertThat(result.getThroughputPercent()).isGreaterThan(90.0);
-            log.info("✅ Parallel GC 높은 처리량 확인: {:.2f}%", result.getThroughputPercent());
+            log.info("✅ Parallel GC 높은 처리량 확인: {}%", String.format("%.2f", result.getThroughputPercent()));
         }
         
         logTestResult("Parallel GC", result);
@@ -138,8 +138,8 @@ public class GCPerformanceTestSuite {
             // G1 GC는 낮은 지연시간과 높은 처리량의 균형
             assertThat(result.getAvgPauseMs()).isLessThan(200.0); // 200ms 미만
             assertThat(result.getThroughputPercent()).isGreaterThan(95.0); // 95% 이상
-            log.info("✅ G1 GC 균형잡힌 성능 확인 - Pause: {:.2f}ms, Throughput: {:.2f}%", 
-                    result.getAvgPauseMs(), result.getThroughputPercent());
+            log.info("✅ G1 GC 균형잡힌 성능 확인 - Pause: {}ms, Throughput: {}%", 
+                    String.format("%.2f", result.getAvgPauseMs()), String.format("%.2f", result.getThroughputPercent()));
         }
         
         logTestResult("G1 GC", result);
@@ -170,8 +170,8 @@ public class GCPerformanceTestSuite {
             // ZGC는 매우 낮은 지연시간 목표 (10ms 미만)
             assertThat(result.getAvgPauseMs()).isLessThan(10.0);
             assertThat(result.getThroughputPercent()).isGreaterThan(98.0);
-            log.info("✅ ZGC 초저지연 성능 확인 - Pause: {:.2f}ms, Throughput: {:.2f}%", 
-                    result.getAvgPauseMs(), result.getThroughputPercent());
+            log.info("✅ ZGC 초저지연 성능 확인 - Pause: {}ms, Throughput: {}%", 
+                    String.format("%.2f", result.getAvgPauseMs()), String.format("%.2f", result.getThroughputPercent()));
         }
         
         logTestResult("ZGC", result);
@@ -338,11 +338,11 @@ public class GCPerformanceTestSuite {
      */
     private void logTestResult(String gcType, GCTestResult result) {
         log.info("=== {} 테스트 결과 ===", gcType);
-        log.info("평균 GC Pause Time: {:.2f}ms", result.getAvgPauseMs());
-        log.info("최대 GC Pause Time: {:.2f}ms", result.getMaxPauseMs());
+        log.info("평균 GC Pause Time: {}ms", String.format("%.2f", result.getAvgPauseMs()));
+        log.info("최대 GC Pause Time: {}ms", String.format("%.2f", result.getMaxPauseMs()));
         log.info("시간당 GC 횟수: {}", result.getGcCountPerHour());
-        log.info("GC 오버헤드: {:.2f}%", result.getGcOverheadPercent());
-        log.info("처리량: {:.2f}%", result.getThroughputPercent());
+        log.info("GC 오버헤드: {}%", String.format("%.2f", result.getGcOverheadPercent()));
+        log.info("처리량: {}%", String.format("%.2f", result.getThroughputPercent()));
         log.info("총 테스트 시간: {}ms", result.getTotalTestTimeMs());
         log.info("총 GC 시간: {}ms", result.getTotalGcTimeMs());
     }

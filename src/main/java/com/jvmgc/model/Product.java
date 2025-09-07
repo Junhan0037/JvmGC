@@ -4,6 +4,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
+
 /**
  * 상품 정보를 담는 모델 클래스
  * - GC 성능 테스트에서 사용되는 기본 도메인 객체
@@ -47,22 +51,22 @@ public class Product {
     /**
      * 상품 태그들 - 컬렉션 객체 메모리 사용량 테스트
      */
-    private java.util.List<String> tags;
+    private List<String> tags;
     
     /**
      * 상품 속성들 - Map 객체 메모리 사용량 테스트
      */
-    private java.util.Map<String, Object> attributes;
+    private Map<String, Object> attributes;
     
     /**
      * 생성 시간 - 시간 객체 메모리 할당 테스트
      */
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
     
     /**
      * 업데이트 시간
      */
-    private java.time.LocalDateTime updatedAt;
+    private LocalDateTime updatedAt;
     
     /**
      * 테스트용 생성자 - 기본 데이터로 상품 객체 생성
@@ -77,7 +81,7 @@ public class Product {
         this.attributes = new java.util.HashMap<>();
         this.attributes.put("color", "red");
         this.attributes.put("size", "medium");
-        this.createdAt = java.time.LocalDateTime.now();
-        this.updatedAt = java.time.LocalDateTime.now();
+        this.createdAt = LocalDateTime.now();
+        this.updatedAt = LocalDateTime.now();
     }
 }

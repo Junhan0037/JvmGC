@@ -1,5 +1,6 @@
 package com.jvmgc.leak;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.DisplayName;
@@ -10,9 +11,11 @@ import java.lang.management.ManagementFactory;
 import java.lang.management.MemoryMXBean;
 import java.lang.management.MemoryUsage;
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -35,6 +38,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 public class MemoryLeakDetectionTest {
     
+    /**
+     * 메모리 모니터링을 위한 MXBean - 힙 메모리 사용량 추적용
+     */
+    @SuppressWarnings("unused") // 실제로는 내부 클래스 MemoryMonitor에서 사용됨
     private final MemoryMXBean memoryBean;
     
     public MemoryLeakDetectionTest() {
@@ -428,8 +435,8 @@ public class MemoryLeakDetectionTest {
     private void logMemoryReport(String testName, MemoryUsageReport report) {
         log.info("=== {} 결과 ===", testName);
         log.info("메모리 누수 감지: {}", report.isMemoryLeakDetected());
-        log.info("메모리 효율성: {:.2f}%", report.getMemoryEfficiency() * 100);
-        log.info("누수율: {:.2f}%", report.getLeakRate() * 100);
+        log.info("메모리 효율성: {}%", String.format("%.2f", report.getMemoryEfficiency() * 100));
+        log.info("누수율: {}%", String.format("%.2f", report.getLeakRate() * 100));
         log.info("최대 메모리 사용량: {}", formatBytes(report.getMaxMemoryUsed()));
         log.info("평균 메모리 사용량: {}", formatBytes(report.getAvgMemoryUsed()));
     }
@@ -698,7 +705,7 @@ public class MemoryLeakDetectionTest {
     /**
      * 메모리 사용량 리포트
      */
-    @lombok.Builder
+    @Builder
     @Data
     static class MemoryUsageReport {
         private boolean memoryLeakDetected;

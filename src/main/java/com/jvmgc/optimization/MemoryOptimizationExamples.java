@@ -1,11 +1,13 @@
 package com.jvmgc.optimization;
 
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
-import java.awt.image.BufferedImage;
 import java.lang.ref.WeakReference;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -57,7 +59,7 @@ public class MemoryOptimizationExamples {
                 badTime / 1_000_000, badList.size());
         log.info("좋은 예 (초기 크기 지정): {}ms, 최종 크기: {}", 
                 goodTime / 1_000_000, goodList.size());
-        log.info("성능 향상: {:.2f}배", (double) badTime / goodTime);
+        log.info("성능 향상: {}배", String.format("%.2f", (double) badTime / goodTime));
         
         // 메모리 정리
         badList.clear();
@@ -111,7 +113,7 @@ public class MemoryOptimizationExamples {
                 badTime / 1_000_000, badResult.length());
         log.info("좋은 예 (StringBuilder): {}ms, 길이: {}", 
                 goodTime / 1_000_000, goodResult.length());
-        log.info("성능 향상: {:.2f}배", (double) badTime / goodTime);
+        log.info("성능 향상: {}배", String.format("%.2f", (double) badTime / goodTime));
         
         // 결과 검증
         assert badResult.equals(goodResult) : "결과가 다릅니다!";
@@ -258,7 +260,7 @@ public class MemoryOptimizationExamples {
                 badTime / 1_000_000, badResults.size());
         log.info("좋은 예 (객체 재사용): {}ms, 결과 수: {}", 
                 goodTime / 1_000_000, goodResults.size());
-        log.info("성능 향상: {:.2f}배", (double) badTime / goodTime);
+        log.info("성능 향상: {}배", String.format("%.2f", (double) badTime / goodTime));
         
         // 메모리 정리
         badResults.clear();
@@ -345,7 +347,7 @@ public class MemoryOptimizationExamples {
                 badTime / 1_000_000, badResult.size());
         log.info("좋은 예 (최적화된 스트림): {}ms, 결과 수: {}", 
                 goodTime / 1_000_000, goodResult.size());
-        log.info("성능 향상: {:.2f}배", (double) badTime / goodTime);
+        log.info("성능 향상: {}배", String.format("%.2f", (double) badTime / goodTime));
         
         // 결과 검증
         assert badResult.size() == goodResult.size() : "결과 크기가 다릅니다!";
@@ -528,7 +530,7 @@ public class MemoryOptimizationExamples {
     /**
      * 처리 결과 클래스
      */
-    @lombok.Data
+    @Data
     static class ProcessingResult {
         private int id;
         private String message;

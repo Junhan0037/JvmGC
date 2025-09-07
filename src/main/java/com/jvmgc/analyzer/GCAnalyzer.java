@@ -1,7 +1,9 @@
 package com.jvmgc.analyzer;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.Test;
 import org.springframework.stereotype.Component;
 
 import java.lang.management.GarbageCollectorMXBean;
@@ -11,7 +13,6 @@ import java.lang.management.MemoryUsage;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -53,11 +54,10 @@ public class GCAnalyzer {
     }
     
     /**
-     * GC 영향 분석 테스트
+     * GC 영향 분석 실행
      * - 메모리 집약적 연산 전후의 GC 메트릭 비교
      * - GC 성능 영향 정량적 측정
      */
-    @Test
     public void analyzeGCImpact() {
         log.info("=== GC 영향 분석 시작 ===");
         
@@ -135,6 +135,8 @@ public class GCAnalyzer {
                 // 10%는 잠시 참조 유지
                 try {
                     Thread.sleep(1);
+                    // largeList 참조를 유지하여 GC 지연
+                    log.trace("Large list size: {}", largeList.size());
                 } catch (InterruptedException e) {
                     Thread.currentThread().interrupt();
                 }
@@ -151,6 +153,9 @@ public class GCAnalyzer {
             
             // 의도적으로 참조 해제하여 GC 유발
             // smallList는 루프 종료 시 자동으로 GC 대상이 됨
+            if (i % 1000 == 0) {
+                log.trace("Small list batch {} completed, size: {}", i / 1000, smallList.size());
+            }
         }
         
         // Phase 3: 문자열 연산 집약적 작업
@@ -164,6 +169,7 @@ public class GCAnalyzer {
                 String result = sb.toString(); // 문자열 생성
                 sb.setLength(0); // 버퍼 초기화
                 // result는 GC 대상이 됨
+                log.trace("String batch completed, length: {}", result.length());
             }
         }
         
@@ -236,10 +242,10 @@ public class GCAnalyzer {
      */
     private void logGCMetrics(String phase, GCMetrics metrics) {
         log.info("=== {} GC 메트릭 ===", phase);
-        log.info("힙 메모리 사용량: {} / {} ({:.2f}%)", 
+        log.info("힙 메모리 사용량: {} / {} ({}%)", 
                 formatBytes(metrics.getHeapUsed()),
                 formatBytes(metrics.getHeapMax()),
-                (double) metrics.getHeapUsed() / metrics.getHeapMax() * 100);
+                String.format("%.2f", (double) metrics.getHeapUsed() / metrics.getHeapMax() * 100));
         
         log.info("Non-Heap 메모리 사용량: {} / {}", 
                 formatBytes(metrics.getNonHeapUsed()),
@@ -261,12 +267,12 @@ public class GCAnalyzer {
         log.info("=== GC 분석 리포트 ===");
         log.info("연산 수행 시간: {}ms", report.getOperationTimeMs());
         log.info("힙 메모리 변화: {}", formatBytes(report.getHeapUsedDelta()));
-        log.info("힙 사용률 변화: {:.2f}% → {:.2f}%", 
-                report.getHeapUsageRatioBefore() * 100,
-                report.getHeapUsageRatioAfter() * 100);
+        log.info("힙 사용률 변화: {}% → {}%", 
+                String.format("%.2f", report.getHeapUsageRatioBefore() * 100),
+                String.format("%.2f", report.getHeapUsageRatioAfter() * 100));
         log.info("총 GC 실행 횟수: {}", report.getTotalGCCount());
         log.info("총 GC 시간: {}ms", report.getTotalGCTimeMs());
-        log.info("GC 오버헤드: {:.2f}%", report.getGcOverheadPercent());
+        log.info("GC 오버헤드: {}%", String.format("%.2f", report.getGcOverheadPercent()));
         
         // GC별 상세 정보
         for (Map.Entry<String, GCStatsDelta> entry : report.getGcDeltas().entrySet()) {
@@ -289,26 +295,26 @@ public class GCAnalyzer {
         
         // GC 오버헤드 평가
         if (report.getGcOverheadPercent() > 10) {
-            log.warn("⚠️ GC 오버헤드가 높습니다 ({:.2f}%). 힙 크기 증가 또는 GC 튜닝을 고려하세요.", 
-                    report.getGcOverheadPercent());
+            log.warn("⚠️ GC 오버헤드가 높습니다 ({}%). 힙 크기 증가 또는 GC 튜닝을 고려하세요.", 
+                    String.format("%.2f", report.getGcOverheadPercent()));
         } else if (report.getGcOverheadPercent() > 5) {
-            log.info("ℹ️ GC 오버헤드가 보통 수준입니다 ({:.2f}%).", 
-                    report.getGcOverheadPercent());
+            log.info("ℹ️ GC 오버헤드가 보통 수준입니다 ({})%.", 
+                    String.format("%.2f", report.getGcOverheadPercent()));
         } else {
-            log.info("✅ GC 오버헤드가 낮습니다 ({:.2f}%).", 
-                    report.getGcOverheadPercent());
+            log.info("✅ GC 오버헤드가 낮습니다 ({})%.", 
+                    String.format("%.2f", report.getGcOverheadPercent()));
         }
         
         // 힙 사용률 평가
         if (report.getHeapUsageRatioAfter() > 0.8) {
-            log.warn("⚠️ 힙 사용률이 높습니다 ({:.2f}%). OutOfMemoryError 위험이 있습니다.", 
-                    report.getHeapUsageRatioAfter() * 100);
+            log.warn("⚠️ 힙 사용률이 높습니다 ({}%). OutOfMemoryError 위험이 있습니다.", 
+                    String.format("%.2f", report.getHeapUsageRatioAfter() * 100));
         } else if (report.getHeapUsageRatioAfter() > 0.6) {
-            log.info("ℹ️ 힙 사용률이 보통 수준입니다 ({:.2f}%).", 
-                    report.getHeapUsageRatioAfter() * 100);
+            log.info("ℹ️ 힙 사용률이 보통 수준입니다 ({})%.", 
+                    String.format("%.2f", report.getHeapUsageRatioAfter() * 100));
         } else {
-            log.info("✅ 힙 사용률이 안정적입니다 ({:.2f}%).", 
-                    report.getHeapUsageRatioAfter() * 100);
+            log.info("✅ 힙 사용률이 안정적입니다 ({})%.", 
+                    String.format("%.2f", report.getHeapUsageRatioAfter() * 100));
         }
         
         // 권장사항
@@ -348,8 +354,8 @@ public class GCAnalyzer {
     /**
      * GC 메트릭 정보를 담는 클래스
      */
-    @lombok.Builder
-    @lombok.Data
+    @Builder
+    @Data
     public static class GCMetrics {
         private long timestamp;
         private long heapUsed;
@@ -363,8 +369,8 @@ public class GCAnalyzer {
     /**
      * 개별 GC의 통계 정보
      */
-    @lombok.AllArgsConstructor
-    @lombok.Data
+    @AllArgsConstructor
+    @Data
     public static class GCStats {
         private long collectionCount;
         private long collectionTime;
@@ -373,8 +379,8 @@ public class GCAnalyzer {
     /**
      * GC 통계 변화량
      */
-    @lombok.AllArgsConstructor
-    @lombok.Data
+    @AllArgsConstructor
+    @Data
     public static class GCStatsDelta {
         private long countDelta;
         private long timeDelta;
@@ -383,8 +389,8 @@ public class GCAnalyzer {
     /**
      * GC 분석 리포트
      */
-    @lombok.Builder
-    @lombok.Data
+    @Builder
+    @Data
     public static class GCAnalysisReport {
         private long operationTimeMs;
         private long heapUsedDelta;

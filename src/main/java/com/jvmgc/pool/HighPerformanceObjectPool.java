@@ -4,6 +4,8 @@ import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.Gauge;
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.simple.SimpleMeterRegistry;
+import lombok.Builder;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -86,6 +88,7 @@ public class HighPerformanceObjectPool<T> {
     /**
      * 메트릭 레지스트리
      */
+    @SuppressWarnings("unused")
     private final MeterRegistry meterRegistry;
     
     /**
@@ -116,6 +119,7 @@ public class HighPerformanceObjectPool<T> {
     /**
      * 현재 풀 크기 게이지
      */
+    @SuppressWarnings("unused")
     private final Gauge poolSizeGauge;
     
     /**
@@ -178,10 +182,10 @@ public class HighPerformanceObjectPool<T> {
                 .tag("pool", poolName)
                 .register(meterRegistry);
         
-        this.poolSizeGauge = Gauge.builder("object_pool_size")
+        this.poolSizeGauge = Gauge.builder("object_pool_size", this, pool -> (double) pool.poolSize.get())
                 .description("Current size of the object pool")
                 .tag("pool", poolName)
-                .register(meterRegistry, this, pool -> pool.poolSize.get());
+                .register(meterRegistry);
         
         // 풀 사전 워밍업
         warmUpPool();
@@ -396,7 +400,7 @@ public class HighPerformanceObjectPool<T> {
         
         // 풀 크기 일관성 검증
         int actualSize = 0;
-        for (T ignored : pool) {
+        for (@SuppressWarnings("unused") T ignored : pool) {
             actualSize++;
         }
         
@@ -430,8 +434,8 @@ public class HighPerformanceObjectPool<T> {
     /**
      * 풀 통계 정보
      */
-    @lombok.Builder
-    @lombok.Data
+    @Builder
+    @Data
     public static class PoolStats {
         private String poolName;
         private int currentSize;
